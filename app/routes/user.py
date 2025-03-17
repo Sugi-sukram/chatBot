@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserResponse,LoginRequest
 from app.crud import user as crud_user
 from app.crud.user import authenticate_user as authenticate
-from app.db.session import SessionLocal
+from app.database.session import SessionLocal
 
 router = APIRouter()
 

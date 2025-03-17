@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, func
 from sqlalchemy.orm import relationship
-from app.db.session import Base  # ✅ Import Base
+from app.database.session import Base  # ✅ Import Base
 
 class ChatHistory(Base):
     __tablename__ = "chat_histories"
