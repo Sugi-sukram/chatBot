@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Medical AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  </head>
+  <body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex flex-col items-center justify-start p-6">
+    <!-- Header Section -->
+    <header class="text-center text-white mb-8">
+      <h1 class="text-4xl font-bold mb-2">Welcome to MedBot</h1>
+      <p class="text-gray-400">Your 24/7 AI-powered health assistant</p>
+    </header>
+
+    <!-- Content Section -->
+    <section class="w-full max-w-3xl bg-gray-800 shadow-2xl rounded-2xl border border-gray-700 p-6 mb-10">
+      <h2 class="text-2xl text-white font-semibold mb-4">About MedBot</h2>
+      <p class="text-gray-400 leading-relaxed">
+        MedBot is designed to assist you with basic health queries and provide information about common medical conditions.
+        Whether you have questions about symptoms, medications, or general health tips, MedBot is here to help.
+      </p>
+    </section>
+
+    <!-- Chatbot Floating Button -->
+    <button
+      id="chat-toggle"
+      class="fixed bottom-5 right-5 bg-indigo-600 p-4 w-16 h-16 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300 flex items-center justify-center"
+    >
+      <i class="ph ph-chat-centered text-white text-3xl"></i>
+    </button>
+
+    <!-- Chatbot Window -->
+    <div
+      id="chat-container"
+      class="hidden fixed bottom-24 right-5 w-96 bg-gray-800 shadow-2xl rounded-2xl border border-gray-700 flex flex-col h-96"
+    >
+      <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-white">AI Medical Chatbot</h2>
+        <button id="chat-close" class="text-gray-400 hover:text-white">
+          <i class="ph ph-x text-2xl"></i>
+        </button>
+      </div>
+      <div id="chat-messages" class="p-4 flex-1 overflow-y-auto space-y-3">
+        <div class="bg-gray-700 text-white p-3 rounded-lg">
+          Hello! I'm MedBot. How can I assist you with your health today? 😊
+        </div>
+      </div>
+      <div class="flex border-t border-gray-700 p-2">
+        <input
+          id="user-input"
+          type="text"
+          placeholder="Type your message..."
+          class="flex-1 p-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        />
+        <button
+          id="send-btn"
+          class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg transition flex items-center justify-center"
+        >
+          <i class="ph ph-paper-plane-right text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const chatToggle = document.getElementById("chat-toggle");
+      const chatContainer = document.getElementById("chat-container");
+      const chatMessages = document.getElementById("chat-messages");
+      const userInput = document.getElementById("user-input");
+      const sendButton = document.getElementById("send-btn");
+      const chatClose = document.getElementById("chat-close");
+
+      chatToggle.addEventListener("click", () => {
+        chatContainer.classList.toggle("hidden");
+        userInput.focus();
+      });
+
+      chatClose.addEventListener("click", () => {
+        chatContainer.classList.add("hidden");
+      });
+
+      const sendMessage = async () => {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        chatMessages.innerHTML += `<div class='p-2 bg-blue-100 text-gray-800 rounded-lg self-end'>${message}</div>`;
+        userInput.value = "";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        const response = await fetch("/chatbot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+
+        const data = await response.json();
+        const botMessage = data.response;
+
+        chatMessages.innerHTML += `<div class='p-2 bg-gray-200 text-gray-800 rounded-lg'>${botMessage}</div>`;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      };
+
+      sendButton.addEventListener("click", sendMessage);
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>

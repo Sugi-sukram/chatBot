@@ -2,9 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 username = "postgres"
-password = "Erdster%40123"
+password = "sskd"
 host = "localhost"
-port = "5432"
+port = "5433"
 database = "ArtificialIntelligence"
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}"

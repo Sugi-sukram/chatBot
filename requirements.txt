@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+passlib[bcrypt]
+python-multipart
+email-validator
+alembic
+asyncpg
+pymysql
+google-generativeai
+jinja2
+starlette
+python-dotenv
+requests
