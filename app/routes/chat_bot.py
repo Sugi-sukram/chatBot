@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from app.crud.bot import chatbot
+from app.controller.bot import chatbot
 
 
 router = APIRouter()

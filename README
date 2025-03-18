@@ -4,7 +4,7 @@
     ```
     project-name/
     ├── app/
-    │   ├── crud/
+    │   ├── controller/
     │   │   └── user.py
     │   ├── db/
     │   │   └── session.py
