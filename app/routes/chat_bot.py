@@ -7,3 +7,4 @@ router = APIRouter()
 @router.post("/")
 async def chat(request: Request):
     return await chatbot(request)
+    
