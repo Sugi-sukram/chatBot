@@ -1,11 +1,15 @@
+import os
+from dotenv import load_dotenv 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-username = "postgres"
-password = "Erdster%40123"
-host = "localhost"
-port = "5432"
-database = "ArtificialIntelligence"
+load_dotenv()
+
+username = os.getenv("DB_USERNAME")
+password = os.getenv("DB_PASSWORD")
+host = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
+database = os.getenv("DB_NAME")
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}"
 
@@ -17,3 +21,4 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create a Base class for models
 Base = declarative_base()
+

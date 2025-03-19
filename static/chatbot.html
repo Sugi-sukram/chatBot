@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Medical AI Chatbot</title>
+  <!-- FontAwesome Free CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"
+    crossorigin="anonymous"></script>
+
+  <!-- Tailwind CSS (Load Before Custom CSS) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex flex-col items-center justify-start p-6">
+  <header class="text-center text-white mb-8">
+    <h1 class="text-4xl font-bold mb-2">Welcome to MedBot</h1>
+    <p class="text-gray-400">Your 24/7 AI-powered health assistant</p>
+  </header>
+
+  <!-- Content Section -->
+  <section class="w-full max-w-3xl bg-gray-800 shadow-2xl rounded-2xl border border-gray-700 p-6 mb-10">
+    <h2 class="text-2xl text-white font-semibold mb-4">About MedBot</h2>
+    <p class="text-gray-400 leading-relaxed">
+      MedBot is designed to assist you with basic health queries and provide information about common medical
+      conditions.
+      Whether you have questions about symptoms, medications, or general health tips, MedBot is here to help.
+    </p>
+  </section>
+
+  <!-- Chat Toggle Button -->
+  <button id="chat-toggle"
+    class="fixed bottom-5 right-5 bg-indigo-600 p-4 w-16 h-16 rounded-full shadow-lg ring-4 ring-indigo-400/50 hover:bg-indigo-700 transition duration-300 flex items-center justify-center">
+    <i id="toggle-icon" class="fas fa-comment-dots text-white text-3xl"></i>
+  </button>
+
+  <!-- Chat Container -->
+  <div id="chat-container"
+    class="hidden fixed bottom-24 right-5 w-96 bg-gray-900/80 backdrop-blur-md shadow-2xl rounded-2xl border border-gray-700 flex flex-col h-[500px]">
+    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+      <h2 class="text-lg font-bold text-white">AI Medical Chatbot</h2>
+      <button id="chat-close" class="text-gray-400 hover:text-white">
+        <i class="fas fa-times text-2xl"></i>
+      </button>
+    </div>
+
+    <!-- Chat Messages -->
+    <div id="chat-messages" class="p-4 flex-1 overflow-y-auto flex flex-col space-y-3 scrollbar scroll-smooth"></div>
+
+
+    <!-- Chat Input -->
+    <div class="flex border-t border-gray-700 p-2">
+      <input id="user-input" type="text" placeholder="Type your message..."
+        class="flex-1 p-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+      <button id="send-btn"
+        class="ml-2 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg transition flex items-center justify-center">
+        <i class="fas fa-paper-plane text-xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const chatToggle = document.getElementById("chat-toggle");
+    const chatContainer = document.getElementById("chat-container");
+    const chatMessages = document.getElementById("chat-messages");
+    const userInput = document.getElementById("user-input");
+    const sendButton = document.getElementById("send-btn");
+    const chatClose = document.getElementById("chat-close");
+    const toggleIcon = document.getElementById("toggle-icon");
+    const storedUser = JSON.parse(localStorage.getItem("user_info"));
+    let chatOpen = false;
+
+    // Toggle chat visibility
+    chatToggle.addEventListener("click", () => {
+      chatOpen = !chatOpen;
+      chatContainer.classList.toggle("hidden");
+      toggleIcon.className = chatOpen ? "fas fa-times" : "fas fa-comment-dots";
+      if (chatOpen) {
+        userInput.focus();
+        fetchChatHistory();
+      }
+    });
+
+    chatClose.addEventListener("click", () => {
+      chatOpen = false;
+      chatContainer.classList.add("hidden");
+      toggleIcon.className = "fas fa-comment-dots";
+    });
+
+    // Format timestamp
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+    }
+  
+    // Fetch chat history
+    const fetchChatHistory = async () => {
+      try {
+        const response = await fetch(`/histories/${storedUser.id}`);
+        if (!response.ok) throw new Error("Failed to fetch chat history");
+        const history = await response.json();
+        chatMessages.innerHTML = "";
+
+        history.forEach((chat) => {
+          appendMessage(chat.message, chat.response === "user", chat.timestamp);
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    };
+
+    // Append messages
+    function appendMessage(text, isUser = true, timestamp = new Date()) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `p-2 rounded-lg max-w-xs text-white text-sm ${isUser ? "bg-blue-600 self-end" : "bg-gray-700 self-start"
+        }`;
+
+      messageDiv.innerHTML = `
+            <span>${text}</span>
+            <div class='text-xs text-gray-300 mt-1 self-end'>${formatTime(timestamp)}</div>
+        `;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Typewriter effect for bot messages with timestamp
+    function typeEffect(element, text, speed = 50) {
+      let i = 0;
+      element.innerHTML = `<span class='message-text'></span><br><span class='text-xs text-gray-300 mt-1 self-end'>${formatTime(new Date())}</span>`;
+
+      const messageSpan = element.querySelector(".message-text");
+
+      function typing() {
+        if (i < text.length) {
+          messageSpan.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(typing, speed);
+        }
+      }
+      typing();
+    }
+
+    // Send message function
+    const sendMessage = async () => {
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      appendMessage(message, true);
+      userInput.value = "";
+
+      try {
+        const response = await fetch("/chatbot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+
+        if (!response.ok) throw new Error("Failed to send message");
+        const data = await response.json();
+
+        const botMessageDiv = document.createElement("div");
+        botMessageDiv.className = "p-2 bg-gray-700 text-white rounded-lg self-start max-w-xs";
+        chatMessages.appendChild(botMessageDiv);
+
+        typeEffect(botMessageDiv, data.response);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Save messages in chat history
+        await fetch("/histories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: storedUser.id, message, response: "user" }),
+        });
+
+        await fetch("/histories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: storedUser.id, message: data.response, response: "bot" }),
+        });
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    };
+
+    // Send message on button click or enter key press
+    sendButton.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+
+</html>
